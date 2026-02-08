@@ -1,0 +1,7 @@
+{
+  "name": "The Lucky Trip - Lead Quiz",
+  "description": "A premium travel lead capture system with a multi-step quiz, admin dashboard, and automated data tracking.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
