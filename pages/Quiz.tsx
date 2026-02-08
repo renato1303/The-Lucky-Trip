@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QuizStep } from '../types';
 import { storageService } from '../services/storageService';
-import { POPULAR_DESTINATIONS } from '../constants';
 
 const Quiz: React.FC = () => {
   const navigate = useNavigate();
@@ -40,7 +39,7 @@ const Quiz: React.FC = () => {
     if (step === QuizStep.Name && !formData.name.trim()) newErrors.name = 'Por favor, insira seu nome.';
     if (step === QuizStep.WhatsApp && formData.whatsapp.length < 14) newErrors.whatsapp = 'Insira um número válido.';
     if (step === QuizStep.Age && (!formData.age || parseInt(formData.age) < 18)) newErrors.age = 'A idade mínima é 18 anos.';
-    if (step === QuizStep.Destination && !formData.destination) newErrors.destination = 'Escolha um destino.';
+    if (step === QuizStep.Destination && !formData.destination.trim()) newErrors.destination = 'Por favor, escreva o destino dos seus sonhos.';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -139,32 +138,16 @@ const Quiz: React.FC = () => {
         {step === QuizStep.Destination && (
           <div className="quiz-transition">
             <h3 className="font-serif text-3xl text-premium-darkBlue mb-6">Qual destino você sonha conhecer?</h3>
-            <div className="grid grid-cols-1 gap-3 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
-              {POPULAR_DESTINATIONS.map((dest) => (
-                <button
-                  key={dest}
-                  onClick={() => handleInputChange('destination', dest)}
-                  className={`text-left p-4 rounded-xl border transition-all ${
-                    formData.destination === dest 
-                    ? 'border-premium-gold bg-premium-goldLight/30 text-premium-darkBlue' 
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                  }`}
-                >
-                  {dest}
-                </button>
-              ))}
-              <div className="mt-4">
-                <p className="text-sm text-gray-400 mb-2">Ou digite outro:</p>
-                <input
-                  type="text"
-                  placeholder="Ex: Tailândia"
-                  value={POPULAR_DESTINATIONS.includes(formData.destination) ? '' : formData.destination}
-                  onChange={(e) => handleInputChange('destination', e.target.value)}
-                  className="w-full bg-transparent border-b-2 border-gray-200 py-2 text-lg focus:border-premium-gold outline-none"
-                />
-              </div>
-            </div>
-            {errors.destination && <p className="mt-4 text-red-500 text-sm">{errors.destination}</p>}
+            <input
+              autoFocus
+              type="text"
+              placeholder="Ex: Maldivas, Paris, Fernando de Noronha..."
+              value={formData.destination}
+              onChange={(e) => handleInputChange('destination', e.target.value)}
+              className="w-full bg-transparent border-b-2 border-gray-200 py-4 text-xl focus:border-premium-gold outline-none transition-colors"
+            />
+            <p className="mt-4 text-gray-400 text-sm">Digite qualquer lugar do mundo que você deseja explorar.</p>
+            {errors.destination && <p className="mt-2 text-red-500 text-sm">{errors.destination}</p>}
           </div>
         )}
 

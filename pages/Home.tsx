@@ -22,7 +22,7 @@ const Home: React.FC = () => {
               Bem-vindo ao Extraordinário
             </span>
             <h2 className="font-serif text-4xl md:text-5xl leading-tight text-premium-darkBlue">
-              Descubra sua próxima viagem dos sonhos
+              Viaje melhor e de forma inteligente
             </h2>
             <p className="text-gray-500 font-light text-lg">
               Responda algumas perguntas rápidas e receba uma curadoria exclusiva para o seu perfil.
@@ -44,11 +44,20 @@ const Home: React.FC = () => {
       </main>
 
       {/* Footer / Social Proof */}
-      <footer className="p-8 text-center bg-premium-offWhite">
+      <footer className="p-8 text-center bg-premium-offWhite space-y-6">
         <div className="flex justify-center space-x-8 opacity-40 grayscale filter">
           <img src="https://picsum.photos/id/13/100/40" alt="Partner 1" className="h-6 object-contain" />
           <img src="https://picsum.photos/id/15/100/40" alt="Partner 2" className="h-6 object-contain" />
           <img src="https://picsum.photos/id/28/100/40" alt="Partner 3" className="h-6 object-contain" />
+        </div>
+        
+        <div className="pt-4 border-t border-gray-200/50">
+          <button 
+            onClick={() => navigate('/login')}
+            className="text-[10px] text-gray-300 uppercase tracking-widest hover:text-premium-gold transition-colors"
+          >
+            Acesso Restrito
+          </button>
         </div>
       </footer>
     </div>
