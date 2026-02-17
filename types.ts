@@ -4,6 +4,9 @@ export interface Lead {
   name: string;
   whatsapp: string;
   age: number;
+  travelFrequency: 'Baixa' | 'Média' | 'Alta';
+  hasInternationalExperience: boolean;
+  lastTrip: string;
   destination: string;
   timestamp: string;
   utmSource?: string;
@@ -13,8 +16,11 @@ export enum QuizStep {
   Name = 0,
   WhatsApp = 1,
   Age = 2,
-  Destination = 3,
-  Review = 4
+  Frequency = 3,
+  International = 4,
+  LastTrip = 5,
+  Destination = 6,
+  Review = 7
 }
 
 export interface AdminStats {

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QuizStep } from '../types';
 import { storageService } from '../services/storageService';
@@ -11,6 +11,9 @@ const Quiz: React.FC = () => {
     name: '',
     whatsapp: '',
     age: '',
+    travelFrequency: '' as 'Baixa' | 'Média' | 'Alta' | '',
+    hasInternationalExperience: null as boolean | null,
+    lastTrip: '',
     destination: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -22,8 +25,7 @@ const Quiz: React.FC = () => {
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    if (field === 'whatsapp') value = formatWhatsApp(value);
+  const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => {
@@ -39,7 +41,10 @@ const Quiz: React.FC = () => {
     if (step === QuizStep.Name && !formData.name.trim()) newErrors.name = 'Por favor, insira seu nome.';
     if (step === QuizStep.WhatsApp && formData.whatsapp.length < 14) newErrors.whatsapp = 'Insira um número válido.';
     if (step === QuizStep.Age && (!formData.age || parseInt(formData.age) < 18)) newErrors.age = 'A idade mínima é 18 anos.';
-    if (step === QuizStep.Destination && !formData.destination.trim()) newErrors.destination = 'Por favor, escreva o destino dos seus sonhos.';
+    if (step === QuizStep.Frequency && !formData.travelFrequency) newErrors.travelFrequency = 'Selecione uma opção.';
+    if (step === QuizStep.International && formData.hasInternationalExperience === null) newErrors.international = 'Responda se já viajou para o exterior.';
+    if (step === QuizStep.LastTrip && !formData.lastTrip.trim()) newErrors.lastTrip = 'Conte-nos sobre sua última aventura.';
+    if (step === QuizStep.Destination && !formData.destination.trim()) newErrors.destination = 'Qual seu destino dos sonhos?';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -65,6 +70,9 @@ const Quiz: React.FC = () => {
       name: formData.name,
       whatsapp: formData.whatsapp,
       age: parseInt(formData.age),
+      travelFrequency: formData.travelFrequency as any,
+      hasInternationalExperience: !!formData.hasInternationalExperience,
+      lastTrip: formData.lastTrip,
       destination: formData.destination
     });
     navigate('/obrigado');
@@ -74,7 +82,6 @@ const Quiz: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col p-6 max-w-lg mx-auto w-full">
-      {/* Progress Bar */}
       <div className="w-full h-1.5 bg-gray-100 rounded-full mb-12">
         <div 
           className="h-full bg-premium-gold rounded-full transition-all duration-500 ease-out"
@@ -92,11 +99,11 @@ const Quiz: React.FC = () => {
       <div className="flex-1 space-y-8">
         {step === QuizStep.Name && (
           <div className="quiz-transition">
-            <h3 className="font-serif text-3xl text-premium-darkBlue mb-6">Qual é o seu nome completo?</h3>
+            <h3 className="font-serif text-3xl text-premium-darkBlue mb-6">Como podemos te chamar?</h3>
             <input
               autoFocus
               type="text"
-              placeholder="Ex: João Silva"
+              placeholder="Seu nome completo"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               className="w-full bg-transparent border-b-2 border-gray-200 py-4 text-xl focus:border-premium-gold outline-none transition-colors"
@@ -107,13 +114,13 @@ const Quiz: React.FC = () => {
 
         {step === QuizStep.WhatsApp && (
           <div className="quiz-transition">
-            <h3 className="font-serif text-3xl text-premium-darkBlue mb-6">Qual seu número de WhatsApp?</h3>
+            <h3 className="font-serif text-3xl text-premium-darkBlue mb-6">Qual seu WhatsApp?</h3>
             <input
               autoFocus
               type="tel"
               placeholder="(00) 00000-0000"
               value={formData.whatsapp}
-              onChange={(e) => handleInputChange('whatsapp', e.target.value)}
+              onChange={(e) => handleInputChange('whatsapp', formatWhatsApp(e.target.value))}
               className="w-full bg-transparent border-b-2 border-gray-200 py-4 text-xl focus:border-premium-gold outline-none transition-colors"
             />
             {errors.whatsapp && <p className="mt-2 text-red-500 text-sm">{errors.whatsapp}</p>}
@@ -122,7 +129,7 @@ const Quiz: React.FC = () => {
 
         {step === QuizStep.Age && (
           <div className="quiz-transition">
-            <h3 className="font-serif text-3xl text-premium-darkBlue mb-6">Quantos anos você tem?</h3>
+            <h3 className="font-serif text-3xl text-premium-darkBlue mb-6">Sua idade?</h3>
             <input
               autoFocus
               type="number"
@@ -135,42 +142,85 @@ const Quiz: React.FC = () => {
           </div>
         )}
 
+        {step === QuizStep.Frequency && (
+          <div className="quiz-transition">
+            <h3 className="font-serif text-3xl text-premium-darkBlue mb-8">Com que frequência você viaja?</h3>
+            <div className="grid grid-cols-1 gap-4">
+              {['Baixa', 'Média', 'Alta'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => { handleInputChange('travelFrequency', option); setTimeout(handleNext, 300); }}
+                  className={`w-full p-4 text-left rounded-2xl border-2 transition-all ${formData.travelFrequency === option ? 'border-premium-gold bg-premium-goldLight/20' : 'border-gray-100 hover:border-gray-300'}`}
+                >
+                  <span className="font-medium text-lg">{option}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === QuizStep.International && (
+          <div className="quiz-transition">
+            <h3 className="font-serif text-3xl text-premium-darkBlue mb-8">Você viaja ou já viajou para o exterior?</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => { handleInputChange('hasInternationalExperience', true); setTimeout(handleNext, 300); }}
+                className={`p-6 text-center rounded-2xl border-2 transition-all ${formData.hasInternationalExperience === true ? 'border-premium-gold bg-premium-goldLight/20' : 'border-gray-100 hover:border-gray-300'}`}
+              >
+                <span className="block text-2xl mb-2">✈️</span>
+                <span className="font-medium">Sim</span>
+              </button>
+              <button
+                onClick={() => { handleInputChange('hasInternationalExperience', false); setTimeout(handleNext, 300); }}
+                className={`p-6 text-center rounded-2xl border-2 transition-all ${formData.hasInternationalExperience === false ? 'border-premium-gold bg-premium-goldLight/20' : 'border-gray-100 hover:border-gray-300'}`}
+              >
+                <span className="block text-2xl mb-2">🌎</span>
+                <span className="font-medium">Não</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === QuizStep.LastTrip && (
+          <div className="quiz-transition">
+            <h3 className="font-serif text-3xl text-premium-darkBlue mb-6">Qual foi a sua última viagem?</h3>
+            <input
+              autoFocus
+              type="text"
+              placeholder="País / Cidade / Estado"
+              value={formData.lastTrip}
+              onChange={(e) => handleInputChange('lastTrip', e.target.value)}
+              className="w-full bg-transparent border-b-2 border-gray-200 py-4 text-xl focus:border-premium-gold outline-none transition-colors"
+            />
+            {errors.lastTrip && <p className="mt-2 text-red-500 text-sm">{errors.lastTrip}</p>}
+          </div>
+        )}
+
         {step === QuizStep.Destination && (
           <div className="quiz-transition">
             <h3 className="font-serif text-3xl text-premium-darkBlue mb-6">Qual destino você sonha conhecer?</h3>
             <input
               autoFocus
               type="text"
-              placeholder="Ex: Maldivas, Paris, Fernando de Noronha..."
+              placeholder="Ex: Maldivas, Alpes Suíços..."
               value={formData.destination}
               onChange={(e) => handleInputChange('destination', e.target.value)}
               className="w-full bg-transparent border-b-2 border-gray-200 py-4 text-xl focus:border-premium-gold outline-none transition-colors"
             />
-            <p className="mt-4 text-gray-400 text-sm">Digite qualquer lugar do mundo que você deseja explorar.</p>
             {errors.destination && <p className="mt-2 text-red-500 text-sm">{errors.destination}</p>}
           </div>
         )}
 
         {step === QuizStep.Review && (
           <div className="quiz-transition space-y-6">
-            <h3 className="font-serif text-3xl text-premium-darkBlue">Podemos confirmar seus dados?</h3>
-            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-              <div className="flex justify-between border-b pb-2">
-                <span className="text-gray-400">Nome</span>
-                <span className="font-medium">{formData.name}</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="text-gray-400">WhatsApp</span>
-                <span className="font-medium">{formData.whatsapp}</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="text-gray-400">Idade</span>
-                <span className="font-medium">{formData.age}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Destino</span>
-                <span className="font-medium text-premium-gold">{formData.destination}</span>
-              </div>
+            <h3 className="font-serif text-3xl text-premium-darkBlue">Podemos confirmar?</h3>
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+              <ReviewRow label="Nome" value={formData.name} />
+              <ReviewRow label="WhatsApp" value={formData.whatsapp} />
+              <ReviewRow label="Frequência" value={formData.travelFrequency} />
+              <ReviewRow label="Exterior" value={formData.hasInternationalExperience ? 'Sim' : 'Não'} />
+              <ReviewRow label="Última Viagem" value={formData.lastTrip} />
+              <ReviewRow label="Sonho" value={formData.destination} highlight />
             </div>
           </div>
         )}
@@ -181,11 +231,18 @@ const Quiz: React.FC = () => {
           onClick={handleNext}
           className="w-full py-4 bg-premium-darkBlue text-white rounded-full font-medium text-lg hover:bg-premium-accent transition-all active:scale-95 shadow-lg"
         >
-          {step === QuizStep.Review ? 'Finalizar e Descobrir' : 'Próximo'}
+          {step === QuizStep.Review ? 'Finalizar Curadoria' : 'Próximo'}
         </button>
       </div>
     </div>
   );
 };
+
+const ReviewRow = ({ label, value, highlight = false }: { label: string, value: string, highlight?: boolean }) => (
+  <div className="flex justify-between border-b border-gray-50 pb-2 last:border-0">
+    <span className="text-gray-400 text-sm">{label}</span>
+    <span className={`font-medium ${highlight ? 'text-premium-gold' : 'text-premium-darkBlue'}`}>{value}</span>
+  </div>
+);
 
 export default Quiz;

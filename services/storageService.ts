@@ -11,7 +11,6 @@ export const storageService = {
   saveLead: (lead: Omit<Lead, 'id' | 'timestamp' | 'utmSource'>): Lead => {
     const leads = storageService.getLeads();
     
-    // Get UTM source from URL
     const urlParams = new URLSearchParams(window.location.search);
     const utmSource = urlParams.get('utm_source') || 'Direct/Organic';
 
@@ -34,11 +33,14 @@ export const storageService = {
   },
 
   exportToCSV: (leads: Lead[]) => {
-    const headers = ['Nome', 'WhatsApp', 'Idade', 'Destino', 'Data/Hora', 'Origem'];
+    const headers = ['Nome', 'WhatsApp', 'Idade', 'Frequência', 'Exterior', 'Última Viagem', 'Sonho', 'Data', 'Origem'];
     const rows = leads.map(l => [
       l.name,
       l.whatsapp,
       l.age,
+      l.travelFrequency,
+      l.hasInternationalExperience ? 'Sim' : 'Não',
+      l.lastTrip,
       l.destination,
       new Date(l.timestamp).toLocaleString('pt-BR'),
       l.utmSource
